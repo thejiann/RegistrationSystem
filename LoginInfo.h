@@ -23,6 +23,7 @@ public:
         CurrentUser = currentUser;
     }
 };
+
  //初始化类的静态成员
 User *LoginInfo::CurrentUser = NULL;
 bool LoginInfo::Status = false;

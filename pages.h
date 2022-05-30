@@ -41,7 +41,6 @@ void showAdminPage();
 //登录界面
 void showFirstPage() {
     int functionId;
-    bool loginStatus;
     string phoneNumber;
     string password;
     cout << "登录 0" << endl;
@@ -52,13 +51,17 @@ void showFirstPage() {
     std::system("clear");
     switch (functionId) {
         case LOGIN_IN: {// 登录
-            do {
-                cout << "PhoneNumber:（请输入11位手机号码）";
-                cin >> phoneNumber;
-                cout << "password: ";
-                cin >> password;
-                loginStatus = User::Login(phoneNumber, password);
-            } while (!loginStatus);
+            cout << "PhoneNumber:（请输入11位手机号码）";
+            cin >> phoneNumber;
+            cout << "password: ";
+            cin >> password;
+            bool haveLogin = User::Login(phoneNumber, password);
+            if (!haveLogin) {
+                cout << "用户名或密码错误！" << endl;
+                enterBack();
+                showFirstPage();
+                return;
+            }
             system("clear");
             cout << "Login success!" << endl;
             User *user = LoginInfo::getCurrentUser();
@@ -78,7 +81,9 @@ void showFirstPage() {
             break;
         case SIGN_UP:
             User::Register(); //注册
-            break;
+            cout << "注册成功，请重新登录!" << endl;
+            enterBack();
+            showFirstPage();
         case EXIT:
             exit(0);
         default:
@@ -248,7 +253,7 @@ void showAdminPage() {
     cout << "添加医生 3" << endl;
     cout << "查看所有用户信息 4" << endl;
     cout << "注销任意账户 5" << endl;
-    cout << "添加hao_type 6" << endl;
+    cout << "添加号类型 6" << endl;
     cout << "退出系统 -1" << endl;
 
     int functionId;
@@ -303,7 +308,7 @@ void showAdminPage() {
             showAdminPage();
             return;
         }
-        case ADD_HAO_TYPE: {
+        case ADD_HAO_TYPE: { //添加号类型
             HaoType::CreateHaoType();
             enterBack();
             showAdminPage();

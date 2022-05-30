@@ -64,20 +64,30 @@ void Department::showAllDepartments() {
     } else { // query succeeded, process any data returned by it
         result = mysql_store_result(Cur);
         if (result) { // there are rows
-            MYSQL_ROW row;
-            Department *department = new Department();
-            while ((row = mysql_fetch_row(result))) {
-                department->id = atoi(row[0]);
-                department->name = row[1];
-                department->address = row[2];
-                cout << to_string(department->id) + "\t";
-                cout << department->name + "\t";
-                cout << department->address + "\n";
+            {
+                MYSQL_ROW row;
+                unsigned int num_fields = mysql_num_fields(result);
+                Department *department = new Department();
+                cout.width(5);
+                cout << std::left << "id";
+                cout.width(20);
+                cout << std::left << "name";
+                cout.width(20);
+                cout << std::left << "address" << endl;
+                while ((row = mysql_fetch_row(result))) {
+                    for (int i = 0; i < num_fields; i++) {
+                        if (i == 0) {
+                            cout.width(5);
+                        } else {
+                            cout.width(20);
+                        }
+                        cout << std::left << row[i];
+                    }
+                    cout << "\n";
+                }
             }
         }
     }
 }
 
-Department::Department() {
-
-}
+Department::Department() {}

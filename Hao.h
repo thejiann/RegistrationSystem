@@ -8,6 +8,7 @@
 
 #define MAX_SQL_LENGTH 300
 
+//号
 class Hao {
 private:
     int id;
@@ -31,6 +32,8 @@ public:
     static void showMyPatientGuahao(vector<int> haoTypeIds);
 
     static void showHaosByHaoTypeId(int haoTypeId);
+
+    static void yicixing();
 };
 
 //号类型
@@ -47,7 +50,7 @@ public:
 
     static void showHaoTypeInfosByDepartmentId(int departmentId);
 
-    static vector<int> getHaoTypeIdsByDoctorId(int doctorId);
+    static vector<int> getHaoTypeIdsByDoctorId(int doctorId);  //通过科室编号显示号类型信息
 
     static bool haveHaoType(int haoTypeId);
 };
@@ -60,9 +63,9 @@ void HaoType::CreateHaoType() {
     int doctorId;
     string time;
     double fee;
-    cout << "请输入号的科室id:";  //问题：管理员不知道科室id，换成名称？
+    cout << "请输入号的科室id:";
     cin >> departmentId;
-    cout << "请输入号的医生id:";  //问题：管理员不知道医生id，换成名称？
+    cout << "请输入号的医生id:";
     cin >> doctorId;
     cout << "请输入号的时间:";
     cin >> time;
@@ -88,6 +91,7 @@ void HaoType::CreateHaoType() {
     cout << "添加失败！原因:[" + errorInfo + "]" << endl;
 }
 
+//通过科室编号显示号类型信息
 void HaoType::showHaoTypeInfosByDepartmentId(int departmentId) {
     MYSQL *Cur = connectDb();
     MYSQL_RES *result;  //Defines the result of the select
@@ -96,34 +100,69 @@ void HaoType::showHaoTypeInfosByDepartmentId(int departmentId) {
     int queryRes = mysql_query(Cur, sql);    //执行sql语句
     if (queryRes) {
         // error
+
     } else { // query succeeded, process any data returned by it
         result = mysql_store_result(Cur);
         MYSQL_ROW row;
         int restOfHao;
         unsigned int num_fields = mysql_num_fields(result);
+
+        cout.width(4);
+        cout << std::left << "id";
+        cout.width(12);
+        cout << std::left << "name";
+        cout.width(28);
+        cout << std::left << "professional title";
+        cout.width(108);
+        cout << std::left << "brief introduction";
+        cout.width(16);
+        cout << std::left << "time";
+        cout.width(8);
+        cout << std::left << "fee";
+        cout.width(10);
+        cout << std::left << "remaining"<<endl;
         while ((row = mysql_fetch_row(result))) {
             for (int i = 0; i < num_fields; i++) {
                 // 遍历当前行的所有列
                 if (i == 0) {
                     restOfHao = Hao::getRestOfHaoByHaoTypeId(atoi(row[i]));
-                    cout << row[i];
+                    cout.width(3);
+                    cout << std::left << row[i];
                     cout << "\t";
                 } else if (i == 1) {
-                    // 科室 , 不用处理，用不上
-
                 } else if (i == 2) {
                     // 医生id
-                    Doctor *doctor = Doctor::getDoctorByUserId(atoi(row[i]));
-                    cout << doctor->getName() + "\t";
-                    cout << doctor->getProfessionalTitle() + "\t";
-                    cout << doctor->getBriefIntroduction() + "\t";
-                } else {
-                    cout << row[i] << "\t";
+                    Doctor *doctor = Doctor::getDoctorByDoctorId(atoi(row[i]));
+                    if (doctor == NULL) {
+                        cout << "医生信息获取失败！" << endl;
+                        return;
+                    }
+                    cout.width(3);
+                    cout << std::left <<  doctor->getName();
+                    cout << "\t";
+                    cout.width(27);
+                    cout << std::left <<  doctor->getProfessionalTitle();
+                    cout << "\t";
+                    cout.width(105);
+                    cout << std::left <<  doctor->getBriefIntroduction();
+                    cout << "\t";
+                }
+                else if (i==3){
+                    cout.width(15);
+                    cout << std::left << row[i];
+                    cout << "\t";
+                }
+                else {
+                    cout.width(5);
+                    cout << std::left << row[i];
+                    cout << "\t";
                 }
             }
             cout << to_string(restOfHao) << "\n";
         }
+        return;
     }
+    cout << "当前选择的科室没有号！" << endl;
 }
 
 vector<int> HaoType::getHaoTypeIdsByDoctorId(int doctorId) {
@@ -200,14 +239,14 @@ int Hao::getRestOfHaoByHaoTypeId(int haoTypeId) {
 void Hao::guahao(int patientId) {
     int departmentId;
     int haoTypeId;
-//    HaoType::showHaoTypeInfo();
+    //显示所有的科室
     Department::showAllDepartments();
     cout << "请选择科室: ";
     cin >> departmentId;
     system("clear");
 
     HaoType::showHaoTypeInfosByDepartmentId(departmentId);
-    cout << "请选择： ";
+    cout << "请选择相应编号： ";
     cin >> haoTypeId;
 
     if (Hao::getRestOfHaoByHaoTypeId(haoTypeId) <= 0) {
@@ -353,6 +392,18 @@ void Hao::showHaosByHaoTypeId(int haoTypeId) {
                     cout << "\t";
                 }
             }
+        }
+    }
+}
+
+//一次性添加号
+void Hao::yicixing() {
+    MYSQL *Cur = connectDb();
+    char sql[MAX_SQL_LENGTH];
+    for (int i = 10; i <= 79; i++) {
+        for (int j = 0; j < 5; j++) {
+            sprintf(sql, "insert into hao (hao_type_id,patient_id) values(%d,%d)", i, -1);
+            mysql_query(Cur, sql);    //执行sql语句
         }
     }
 }
