@@ -50,6 +50,8 @@ public:
 
     static void deleteUserByUserId(int userId);
 
+    static bool deleteUserByPhoneNumber(string phoneNumber);
+
     string getName() {
         return this->name;
     }
@@ -58,7 +60,7 @@ public:
         return this->userType;
     }
 
-    int getId() {
+    int getUserId() {
         return this->id;
     }
 };
@@ -83,7 +85,7 @@ public:
         return this->briefIntroduction;
     }
 
-    static void setCommonUserToDoctor();
+    static bool setCommonUserToDoctor();
 
     static void addDoctor(int userId);
 
@@ -91,6 +93,10 @@ public:
 
     string getName() {
         return this->name;
+    }
+
+    int getDoctorId() {
+        return this->id;
     }
 };
 
@@ -213,16 +219,16 @@ bool User::Login(const string &phoneNumber, const string &password) {
 
 //显示用户信息
 void User::showUserInfo() {
-    cout << "name:"<< this->name << endl;
-    if(this->sex==0){
+    cout << "name:" << this->name << endl;
+    if (this->sex == 0) {
         cout << "sex:man" << endl;
-    } else{
+    } else {
         cout << "sex:woman" << endl;
     }
     cout << "idCard:" << this->idCard << endl;
-    cout << "phoneNumber:"<< this->phoneNumber << endl;
-    cout << "address:"<< this->address << endl;
-    cout << "password:"<< this->password << endl;
+    cout << "phoneNumber:" << this->phoneNumber << endl;
+    cout << "address:" << this->address << endl;
+    cout << "password:" << this->password << endl;
 }
 
 //修改用户信息
@@ -356,6 +362,23 @@ User *User::getUserById(int userId) {
     return NULL;
 }
 
+bool User::deleteUserByPhoneNumber(string phoneNumber) {
+    User *user = findUserByPhoneNumber(phoneNumber);
+    if (user == NULL) {
+        cout << "该手机号不存在！" << endl;
+        return false;
+    }
+    if (user->userType == DOCTOR) {
+        Doctor::deleteDoctorByUserId(user->getUserId());
+    }
+
+    MYSQL *Cur = connectDb();
+    char sql[MAX_SQL_LENGTH];
+    sprintf(sql, "delete from user where id=%d", user->getUserId());
+    mysql_query(Cur, sql);    //执行sql语句
+    return true;
+}
+
 Doctor *Doctor::getDoctorByUserId(int userId) {
     User *user = User::getUserById(userId);
     Doctor *doctor = new Doctor();
@@ -389,13 +412,18 @@ Doctor *Doctor::getDoctorByUserId(int userId) {
     return NULL;
 }
 
-void Doctor::setCommonUserToDoctor() {
+bool Doctor::setCommonUserToDoctor() {
     string phoneNumber;
     cout << "请输入需要修改为医生的用户的手机号: ";
     cin >> phoneNumber;
     User *user = User::findUserByPhoneNumber(phoneNumber);
-    User::setUserType(user->getId(), DOCTOR);
-    addDoctor(user->getId());
+    if (user == NULL) {
+        cout << "该手机号不存在!" << endl;
+        return false;
+    }
+    User::setUserType(user->getUserId(), DOCTOR);
+    addDoctor(user->getUserId());
+    return true;
 }
 
 void Doctor::addDoctor(int userId) {
@@ -405,9 +433,10 @@ void Doctor::addDoctor(int userId) {
     cout << "科室id: ";
     cin >> departmentId;
     cout << "职称: ";
-    cin >> professionalTitle;
+    getchar();
+    getline(cin, professionalTitle);
     cout << "简介: ";
-    cin >> briefIntroduction;
+    getline(cin, briefIntroduction);
 
     MYSQL *Cur = connectDb();
     char sql[MAX_SQL_LENGTH];

@@ -23,6 +23,7 @@
 #define DOCTOR 1
 #define ADMIN 2
 
+//按回车键返回
 void enterBack() {
     cout << "回车返回上级菜单...";
     getchar();
@@ -102,28 +103,25 @@ void showPatientPage() {
     User *currentUser = LoginInfo::getCurrentUser();
     switch (functionId) {
         case REGISTER: {    //挂号
-            Hao::guahao(currentUser->getId());
+            Hao::guahao(currentUser->getUserId());
             enterBack();
             showPatientPage();
             return;
         }
             break;
         case VIEW_REGISTER_INFO:  //查询已挂号信息
-            Hao::showPatientHaoInfo(currentUser->getId());
+            Hao::showPatientHaoInfo(currentUser->getUserId());
             enterBack();
             showPatientPage();
             break;
         case CANCEL_REGISTER: {  //取消挂号
-            int havaHao = Hao::showPatientHaoInfo(currentUser->getId());
+            int havaHao = Hao::showPatientHaoInfo(currentUser->getUserId());
             if (havaHao) {
                 cout << "请选择需要取消的号: ";
                 int haoId;
                 cin >> haoId;
-                Hao::cancelHao(currentUser->getId(), haoId);
-                cout << "回车返回上级菜单...";
-                while (cin.get() != '\n') {
-                }
-                system("clear");
+                Hao::cancelHao(currentUser->getUserId(), haoId);
+                enterBack();
                 showPatientPage();
                 return;
             }
@@ -140,7 +138,8 @@ void showPatientPage() {
                 updateStatus = currentUser->updateUserInfo();
                 if (updateStatus) {
                     cout << "信息修改成功！";
-                    system("clear");
+                    //  system("clear");
+                    enterBack();
                     showPatientPage();
                     return;
                 } else {
@@ -148,10 +147,7 @@ void showPatientPage() {
                     bool NotContinueModify;
                     cin >> NotContinueModify;
                     if (NotContinueModify) {
-                        cout << "回车返回上级菜单...";
-                        while (cin.get() != '\n') {
-                        }
-                        system("clear");
+                        enterBack();
                         showPatientPage();
                         return;
                     } else {
@@ -179,6 +175,7 @@ void showPatientPage() {
 }
 
 #define SHOW_MY_PATIENT_GUAHAO 1
+
 //医生界面
 void showDoctorPage() {
     cout << "查看自己自己患者的挂号信息 1" << endl;
@@ -190,29 +187,27 @@ void showDoctorPage() {
     cin >> functionId;
     system("clear");
     User *currentUser = LoginInfo::getCurrentUser();
+    Doctor *doctor = Doctor::getDoctorByUserId(currentUser->getUserId());
     switch (functionId) {
-        case SHOW_MY_PATIENT_GUAHAO: {
-            vector<int> haoTypeIds = HaoType::getHaoTypeIdsByDoctorsUserId(currentUser->getId());
+        case SHOW_MY_PATIENT_GUAHAO: {   //查看自己患者的挂号信息
+            vector<int> haoTypeIds = HaoType::getHaoTypeIdsByDoctorId(doctor->getDoctorId());
             enterBack();
             showDoctorPage();
             return;
         }
-        case VIEW_USER_INFO: {
+        case VIEW_USER_INFO: { //查看用户信息
             currentUser->showUserInfo();
             enterBack();
             showDoctorPage();
             return;
         }
-        case MODIFY_USER_INFO: {
+        case MODIFY_USER_INFO: { //修改用户信息
             bool updateStatus;
             while (true) {
                 updateStatus = currentUser->updateUserInfo();
                 if (updateStatus) {
                     cout << "信息修改成功！";
-                    cout << "回车返回上级菜单...";
-                    while (cin.get() != '\n') {
-                    }
-                    system("clear");
+                    enterBack();
                     showDoctorPage();
                     return;
                 } else {
@@ -220,7 +215,8 @@ void showDoctorPage() {
                     bool NotContinueModify;
                     cin >> NotContinueModify;
                     if (NotContinueModify) {
-                        system("clear");
+                        //system("clear");
+                        enterBack();
                         showDoctorPage();
                         return;
                     } else {
@@ -230,6 +226,11 @@ void showDoctorPage() {
                 }
             }
         }
+        case EXIT:
+            exit(0);
+        default:
+            cout << "输入错误，请重新输入： ";
+            break;
     }
 }
 
@@ -238,6 +239,8 @@ void showDoctorPage() {
 #define ADD_DOCTOR 3
 #define SHOW_ALL_USERS 4
 #define DELETE_ANY_USER 5
+#define ADD_HAO_TYPE 6
+
 //管理员界面
 void showAdminPage() {
     cout << "添加号 1" << endl;
@@ -245,6 +248,7 @@ void showAdminPage() {
     cout << "添加医生 3" << endl;
     cout << "查看所有用户信息 4" << endl;
     cout << "注销任意账户 5" << endl;
+    cout << "添加hao_type 6" << endl;
     cout << "退出系统 -1" << endl;
 
     int functionId;
@@ -252,7 +256,7 @@ void showAdminPage() {
     system("clear");
     User *currentUser = LoginInfo::getCurrentUser();
     switch (functionId) {
-        case ADD_HAO: {
+        case ADD_HAO: {  //添加号
             int haoTypeId;
             int amount;
             cout << "请输入想要添加的号:" << endl;
@@ -266,34 +270,49 @@ void showAdminPage() {
             showAdminPage();
             return;
         }
-        case SHOW_ALL_GUAHAO: {
+        case SHOW_ALL_GUAHAO: {  //查询所有挂号信息
             Hao::showAllGuahao();
             enterBack();
             showAdminPage();
             return;
         }
-        case ADD_DOCTOR: {
-            Doctor::setCommonUserToDoctor();
-            cout << "添加成功！" << endl;
+        case ADD_DOCTOR: { //添加医生
+            bool isSet = Doctor::setCommonUserToDoctor();
+            if (isSet) {
+                cout << "添加成功！" << endl;
+            }
             enterBack();
             showAdminPage();
             return;
         }
-        case SHOW_ALL_USERS: {
+        case SHOW_ALL_USERS: {  //查看所有用户信息
             User::showAllUserInfo();
             enterBack();
             showAdminPage();
             return;
         }
-        case DELETE_ANY_USER: {
-            int userId;
-            cout << "请输入想要删除的用户id: ";
-            cin >> userId;
-            User::deleteUserByUserId(userId);
-            cout << "删除成功！\n";
+        case DELETE_ANY_USER: { //注销任意账户
+            string phoneNumber;
+            cout << "请输入想要删除用户的手机号码: ";
+            cin >> phoneNumber;
+            bool isDeleted = User::deleteUserByPhoneNumber(phoneNumber);
+            if (isDeleted) {
+                cout << "删除成功！" << endl;
+            }
             enterBack();
             showAdminPage();
             return;
         }
+        case ADD_HAO_TYPE: {
+            HaoType::CreateHaoType();
+            enterBack();
+            showAdminPage();
+            return;
+        }
+        case EXIT:  //退出系统
+            exit(0);
+        default:
+            cout << "输入错误，请重新输入： ";
+            break;
     }
 }

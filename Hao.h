@@ -4,6 +4,7 @@
 #include "Department.h"
 #include "Database/Mysql.h"
 #include "User/User.h"
+#include "bits/stdc++.h"
 
 #define MAX_SQL_LENGTH 300
 
@@ -46,7 +47,9 @@ public:
 
     static void showHaoTypeInfosByDepartmentId(int departmentId);
 
-    static vector<int> getHaoTypeIdsByDoctorsUserId(int userId);
+    static vector<int> getHaoTypeIdsByDoctorId(int doctorId);
+
+    static bool haveHaoType(int haoTypeId);
 };
 
 void HaoType::CreateHaoType() {
@@ -70,7 +73,19 @@ void HaoType::CreateHaoType() {
             doctorId,
             time.c_str(),
             fee);
-    mysql_query(Cur, sql);    //执行sql语句
+    int queryRes = mysql_query(Cur, sql);    //执行sql语句
+    if (queryRes) {
+        // error
+    } else { // query succeeded, process any data returned by it
+        if (mysql_field_count(Cur) == 0) { // when (update || insert || delete)
+            cout << "添加成功！" << endl;
+            return;
+        } else { // mysql_store_result() should have returned data
+            fprintf(stderr, "Error: %s\n", mysql_error(Cur));
+        }
+    }
+    string errorInfo = mysql_error(Cur);
+    cout << "添加失败！原因:[" + errorInfo + "]" << endl;
 }
 
 void HaoType::showHaoTypeInfosByDepartmentId(int departmentId) {
@@ -111,11 +126,11 @@ void HaoType::showHaoTypeInfosByDepartmentId(int departmentId) {
     }
 }
 
-vector<int> HaoType::getHaoTypeIdsByDoctorsUserId(int userId) {
+vector<int> HaoType::getHaoTypeIdsByDoctorId(int doctorId) {
     MYSQL *Cur = connectDb();
     MYSQL_RES *result;  //Defines the result of the select
     char sql[MAX_SQL_LENGTH];
-    sprintf(sql, "select id from hao_type where doctor_id=%d", userId);
+    sprintf(sql, "select id from hao_type where doctor_id=%d", doctorId);
     int queryRes = mysql_query(Cur, sql);    //执行sql语句
     vector<int> resInts;
     if (queryRes) {
@@ -137,6 +152,23 @@ vector<int> HaoType::getHaoTypeIdsByDoctorsUserId(int userId) {
         }
     }
     return resInts;
+}
+
+bool HaoType::haveHaoType(int haoTypeId) {
+    MYSQL *Cur = connectDb();
+    MYSQL_RES *result;  //Defines the result of the select
+    char sql[MAX_SQL_LENGTH];
+    sprintf(sql, "select * from hao_type where id=%d", haoTypeId);
+    int queryRes = mysql_query(Cur, sql);    //执行sql语句
+    if (queryRes) {
+        // error
+    } else { // query succeeded, process any data returned by it
+        result = mysql_store_result(Cur);
+        if (result) { // there are rows
+            return true;
+        }
+    }
+    return false;
 }
 
 int Hao::getRestOfHaoByHaoTypeId(int haoTypeId) {
@@ -246,13 +278,18 @@ void Hao::cancelHao(int patientId, int haoId) {
 }
 
 void Hao::addHao(int haoTypeId, int amount) {
-    MYSQL *Cur = connectDb();
-    char sql[MAX_SQL_LENGTH];
-    for (int i = 0; i < amount; i++) {
-        sprintf(sql, "insert into hao (hao_type_id,patient_id) values(%d,%d)", haoTypeId, -1);
-        mysql_query(Cur, sql);    //执行sql语句
+    if (HaoType::haveHaoType(haoTypeId)) {
+        MYSQL *Cur = connectDb();
+        char sql[MAX_SQL_LENGTH];
+        for (int i = 0; i < amount; i++) {
+            sprintf(sql, "insert into hao (hao_type_id,patient_id) values(%d,%d)", haoTypeId, -1);
+            mysql_query(Cur, sql);    //执行sql语句
+        }
+        cout << "添加成功！" << endl;
+    } else {
+        cout << "输入的hao_type_id不存在！" << endl;
     }
-    cout << "添加成功！" << endl;
+
 }
 
 void Hao::showAllGuahao() {
@@ -270,14 +307,23 @@ void Hao::showAllGuahao() {
             MYSQL_ROW row;
             unsigned int num_fields = mysql_num_fields(result);
             while ((row = mysql_fetch_row(result))) {
+                cout.width(20);
+                cout << std::left << "号id";
+                cout.width(20);
+                cout << std::left << "号类型id";
+                cout.width(20);
+                cout << std::left << "挂号患者id" << endl;
+
                 for (int i = 0; i < num_fields; i++) {
-                    cout << row[i];
-                    cout << "\t";
+                    cout.width(20);
+                    cout << std::left << row[i];
                 }
+                cout << "\n";
             }
         } else {
             cout << "没有号哦" << endl;
         }
+
     }
 }
 

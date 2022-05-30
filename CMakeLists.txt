@@ -3,6 +3,6 @@ project(project)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(project main.cpp Database/Mysql.h User/User.h pages.h Department.h Hao.h LoginInfo.h Doctor.h)
+add_executable(project main.cpp Database/Mysql.h User/User.h pages.h Department.h Hao.h LoginInfo.h)
 target_link_libraries(${PROJECT_NAME} libmysqlclient.so)
 
