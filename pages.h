@@ -142,7 +142,7 @@ void showPatientPage() {
             while (true) {
                 updateStatus = currentUser->updateUserInfo();
                 if (updateStatus) {
-                    cout << "信息修改成功！";
+                    cout << "信息修改成功！" << endl;
                     //  system("clear");
                     enterBack();
                     showPatientPage();
@@ -196,6 +196,14 @@ void showDoctorPage() {
     switch (functionId) {
         case SHOW_MY_PATIENT_GUAHAO: {   //查看自己患者的挂号信息
             vector<int> haoTypeIds = HaoType::getHaoTypeIdsByDoctorId(doctor->getDoctorId());
+            if (haoTypeIds.empty()) {
+                cout << "您没有号！" << endl;
+            } else {
+                Hao::showMyPatientGuahao(haoTypeIds);
+//                for (int i = 0; i < haoTypeIds.size(); i++) {
+//                    Hao::showHaosByHaoTypeId(haoTypeIds.at(i));
+//                }
+            }
             enterBack();
             showDoctorPage();
             return;

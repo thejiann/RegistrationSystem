@@ -10,13 +10,9 @@ public:
     static User *CurrentUser;
 
 public:
-    static bool getLoginStatus() {
-        return Status;
-    }
+    static bool getLoginStatus() {return Status;}
 
-    static User *getCurrentUser() {
-        return CurrentUser;
-    }
+    static User *getCurrentUser() {return CurrentUser;}
 
     static void setLoginInfo(bool status, User *currentUser) {
         Status = status;

@@ -17,18 +17,10 @@ private:
 
 public:
     Department();
-
     static Department *getDepartmentById(int departmentId);
-
     static void showAllDepartments();
-
-    string getName() {
-        return this->name;
-    }
-
-    string getAddress() {
-        return this->address;
-    }
+    string getName() {return this->name;}
+    string getAddress() {return this->address;}
 };
 
 Department *Department::getDepartmentById(int departmentId) {

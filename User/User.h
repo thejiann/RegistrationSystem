@@ -59,33 +59,16 @@ private:
 
 
 public:
-    static Doctor *getDoctorByUserId(int userId);
-
-    static Doctor *getDoctorByDoctorId(int doctorId);
-
-    static int getUserIdByDoctorId(int doctorId);
-
-    string getProfessionalTitle() {
-        return this->professionalTitle;
-    }
-
-    string getBriefIntroduction() {
-        return this->briefIntroduction;
-    }
-
-    static bool setCommonUserToDoctor();
-
-    static void addDoctor(int userId);
-
-    static void deleteDoctorByUserId(int userId);
-
-    string getName() {
-        return this->name;
-    }
-
-    int getDoctorId() {
-        return this->id;
-    }
+static Doctor *getDoctorByUserId(int userId);
+static Doctor *getDoctorByDoctorId(int doctorId);
+static int getUserIdByDoctorId(int doctorId);
+string getProfessionalTitle() {return this->professionalTitle;}
+string getBriefIntroduction() {return this->briefIntroduction;}
+static bool setCommonUserToDoctor();
+static void addDoctor(int userId);
+static void deleteDoctorByUserId(int userId);
+string getName() {return this->name;}
+int getDoctorId() {return this->id;}
 };
 
 //构造函数实现
@@ -199,28 +182,27 @@ bool User::Login(const string &phoneNumber, const string &password) {
 
 //显示用户信息
 void User::showUserInfo() {
-    cout << "name:" << this->name << endl;
+    cout << "name: " << this->name << endl;
     if (this->sex == 0) {
-        cout << "sex:man" << endl;
+        cout << "sex: man" << endl;
     } else {
-        cout << "sex:woman" << endl;
+        cout << "sex: woman" << endl;
     }
-    cout << "idCard:" << this->idCard << endl;
-    cout << "phoneNumber:" << this->phoneNumber << endl;
-    cout << "address:" << this->address << endl;
-    cout << "password:" << this->password << endl;
+    cout << "idCard: " << this->idCard << endl;
+    cout << "phoneNumber: " << this->phoneNumber << endl;
+    cout << "address: " << this->address << endl;
 }
 
 //修改用户信息
 bool User::updateUserInfo() {
     MYSQL *Cur = connectDb();
-    cout << "请输入新密码";
+    cout << "请输入新密码: ";
     cin >> this->password;
-    cout << "请输入新名字";
+    cout << "请输入新名字: ";
     cin >> this->name;
-    cout << "请输入新电话号码";
+    cout << "请输入新电话号码: ";
     cin >> this->phoneNumber;
-    cout << "请输入新地址";
+    cout << "请输入新地址: ";
     cin >> this->address;
     char sql[MAX_SQL_LENGTH];
     sprintf(sql, "update user set password='%s',name='%s',phone_number='%s',address='%s' where id_card='%s'",
@@ -230,7 +212,6 @@ bool User::updateUserInfo() {
             this->address.c_str(),
             this->idCard.c_str()
     );
-    cout << sql << endl;
     int queryRes = mysql_query(Cur, sql);    //执行sql语句
     if (queryRes) {
         // error
