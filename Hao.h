@@ -121,9 +121,9 @@ void HaoType::showHaoTypeInfosByDepartmentId(int departmentId) {
         int restOfHao;
         unsigned int num_fields = mysql_num_fields(result);
 
-        cout.width(4);
+        cout.width(5);
         cout << std::left << "id";
-        cout.width(12);
+        cout.width(11);
         cout << std::left << "name";
         cout.width(28);
         cout << std::left << "professional title";
@@ -196,8 +196,7 @@ vector<int> HaoType::getHaoTypeIdsByDoctorId(int doctorId) {
     sprintf(sql, "select id from hao_type where doctor_id=%d", doctorId);
     int queryRes = mysql_query(Cur, sql);    //执行sql语句
     vector<int> resInts;
-    if (queryRes) {
-        // error
+    if (queryRes) {   // error
     } else { // query succeeded, process any data returned by it
         result = mysql_store_result(Cur);
         if (result) { // there are rows
@@ -207,10 +206,7 @@ vector<int> HaoType::getHaoTypeIdsByDoctorId(int doctorId) {
             }
             return resInts;
         }
-        if (mysql_field_count(Cur) == 0) { // when (update || insert || delete)
-            // query does not return data
-            // (it was not a SELECT)
-            // num_rows = mysql_affected_rows(Cur);
+        if (mysql_field_count(Cur) == 0) {// query does not return data,(it was not a SELECT),num_rows = mysql_affected_rows(Cur);
         } else { // mysql_store_result() should have returned data
             fprintf(stderr, "Error: %s\n", mysql_error(Cur));
         }
@@ -266,16 +262,13 @@ void HaoType::showHaoTypeInfoByIdWithoutHeader(int haoTypeId) {
     sprintf(sql, "select * from hao_type where id=%d", haoTypeId);
     int queryRes = mysql_query(Cur, sql);    //执行sql语句
     if (queryRes) {
-        // error
-
     } else { // query succeeded, process any data returned by it
         result = mysql_store_result(Cur);
         MYSQL_ROW row;
         int restOfHao;
         unsigned int num_fields = mysql_num_fields(result);
         while ((row = mysql_fetch_row(result))) {
-            for (int i = 0; i < num_fields; i++) {
-                // 遍历当前行的所有列
+            for (int i = 0; i < num_fields; i++) {// 遍历当前行的所有列
                 if (i == 0) {
                     restOfHao = Hao::getRestOfHaoByHaoTypeId(atoi(row[i]));
                     cout.width(15);
@@ -309,6 +302,7 @@ void HaoType::showHaoTypeInfoByIdWithoutHeader(int haoTypeId) {
     return;
 }
 
+//统计某号类型下的剩余号数
 int Hao::getRestOfHaoByHaoTypeId(int haoTypeId) {
     MYSQL *Cur = connectDb();
     MYSQL_RES *result;  //Defines the result of the select
@@ -324,10 +318,7 @@ int Hao::getRestOfHaoByHaoTypeId(int haoTypeId) {
             int restOfHao = atoi(row[0]);
             return restOfHao;
         }
-        if (mysql_field_count(Cur) == 0) { // when (update || insert || delete)
-            // query does not return data
-            // (it was not a SELECT)
-            // num_rows = mysql_affected_rows(Cur);
+        if (mysql_field_count(Cur) == 0) {
         } else { // mysql_store_result() should have returned data
             fprintf(stderr, "Error: %s\n", mysql_error(Cur));
         }
@@ -335,6 +326,7 @@ int Hao::getRestOfHaoByHaoTypeId(int haoTypeId) {
     return -1;
 }
 
+//挂号
 void Hao::guahao(int patientId) {
     int departmentId;
     int haoTypeId;
@@ -356,6 +348,7 @@ void Hao::guahao(int patientId) {
     }
 }
 
+//取号
 void Hao::fetchHao(int patientId, int haoTypeId) {
     MYSQL *Cur = connectDb();
     MYSQL_RES *result;  //Defines the result of the select
@@ -378,6 +371,7 @@ void Hao::fetchHao(int patientId, int haoTypeId) {
     }
 }
 
+//查询已挂号信息
 int Hao::showPatientHaoInfo(int patientId) {
     MYSQL *Cur = connectDb();
     MYSQL_RES *result;  //Defines the result of the select
@@ -386,22 +380,16 @@ int Hao::showPatientHaoInfo(int patientId) {
     int queryRes = mysql_query(Cur, sql);    //执行sql语句
     int haoTypeId;
     if (queryRes) {
-        // error
     } else { // query succeeded, process any data returned by it
         result = mysql_store_result(Cur);
         int i = 0;
         if (result)  // there are rows
         {
-            cout.width(8);
-            cout << std::left << "hao_id";
-            cout.width(15);
-            cout << std::left << "hao_type_id";
-            cout.width(15);
-            cout << std::left << "doctor_name";
-            cout.width(13);
-            cout << std::left << "time";
-            cout.width(8);
-            cout << std::left << "fee" << endl;;
+            cout.width(8);  cout << std::left << "hao_id";
+            cout.width(15); cout << std::left << "hao_type_id";
+            cout.width(15); cout << std::left << "doctor_name";
+            cout.width(13); cout << std::left << "time";
+            cout.width(8);  cout << std::left << "fee" << endl;;
             MYSQL_ROW row;
             while ((row = mysql_fetch_row(result))) {
                 haoTypeId = atoi(row[1]);
@@ -411,12 +399,13 @@ int Hao::showPatientHaoInfo(int patientId) {
             }
             return 1;
         } else {
-            cout << "没有号哦" << endl;
+            cout << "没有挂号哦" << endl;
         }
     }
     return 0;
 }
 
+//取消挂号
 void Hao::cancelHao(int patientId, int haoId) {
     MYSQL *Cur = connectDb();
     MYSQL_RES *result;  //Defines the result of the select
@@ -426,6 +415,7 @@ void Hao::cancelHao(int patientId, int haoId) {
     cout << "取消成功！";
 }
 
+//添加号
 void Hao::addHao(int haoTypeId, int amount) {
     if (HaoType::haveHaoType(haoTypeId)) {
         MYSQL *Cur = connectDb();
@@ -438,23 +428,19 @@ void Hao::addHao(int haoTypeId, int amount) {
     } else {
         cout << "输入的hao_type_id不存在！" << endl;
     }
-
 }
 
+//查询所有挂号信息
 void Hao::showAllGuahao() {
     MYSQL *Cur = connectDb();
     MYSQL_RES *result;  //Defines the result of the select
     char sql[MAX_SQL_LENGTH];
     sprintf(sql, "select * from hao where patient_id<>-1");
     int queryRes = mysql_query(Cur, sql);    //执行sql语句
-    cout.width(20);
-    cout << std::left << "号id";
-    cout.width(20);
-    cout << std::left << "号类型id";
-    cout.width(20);
-    cout << std::left << "挂号患者id" << endl;
-    if (queryRes) {
-        // error
+    cout.width(20); cout << std::left << "号id";
+    cout.width(20); cout << std::left << "号类型id";
+    cout.width(20); cout << std::left << "挂号患者id" << endl;
+    if (queryRes) {// error
     } else { // query succeeded, process any data returned by it
         result = mysql_store_result(Cur);
         if (result)  // there are rows
@@ -469,12 +455,13 @@ void Hao::showAllGuahao() {
                 cout << "\n";
             }
         } else {
-            cout << "没有号哦" << endl;
+            cout << "没有患者挂号哦" << endl;
         }
 
     }
 }
 
+//展示自己患者的挂号信息
 void Hao::showMyPatientGuahao(vector<int> haoTypeIds) {
     cout.width(20);
     cout << std::left << "hao_id";
@@ -501,8 +488,7 @@ void Hao::showHaosByHaoTypeId(int haoTypeId) {
     char sql[MAX_SQL_LENGTH];
     sprintf(sql, "select id,patient_id from hao where hao_type_id=%d and patient_id<>-1", haoTypeId);
     int queryRes = mysql_query(Cur, sql);    //执行sql语句
-    if (queryRes) {
-        // error
+    if (queryRes) { // error
     } else { // query succeeded, process any data returned by it
         result = mysql_store_result(Cur);
         if (result)  // there are rows
@@ -510,19 +496,13 @@ void Hao::showHaosByHaoTypeId(int haoTypeId) {
             MYSQL_ROW row;
             unsigned int num_fields = mysql_num_fields(result);
             while ((row = mysql_fetch_row(result))) {
-                cout.width(18);
-                cout << std::left << row[0] << "\t";
+                cout.width(18); cout << std::left << row[0] << "\t";
                 User *user = User::getUserById(atoi(row[1]));
-                cout.width(18);
-                cout << std::left << user->getName() << "\t";
-                cout.width(18);
-                cout << std::left << user->getPhoneNumber() << "\t";
-                cout.width(19);
-                cout << std::left << doctor->getName() << "\t";
-                cout.width(17);
-                cout << std::left << haoType->getTime() << "\t";
-                cout.width(20);
-                cout << std::left << haoType->getFee() << "\t\n";
+                cout.width(18); cout << std::left << user->getName() << "\t";
+                cout.width(18); cout << std::left << user->getPhoneNumber() << "\t";
+                cout.width(19); cout << std::left << doctor->getName() << "\t";
+                cout.width(17); cout << std::left << haoType->getTime() << "\t";
+                cout.width(20); cout << std::left << haoType->getFee() << "\t\n";
             }
         }
     }

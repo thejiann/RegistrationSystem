@@ -196,14 +196,10 @@ void User::showUserInfo() {
 //修改用户信息
 bool User::updateUserInfo() {
     MYSQL *Cur = connectDb();
-    cout << "请输入新密码: ";
-    cin >> this->password;
-    cout << "请输入新名字: ";
-    cin >> this->name;
-    cout << "请输入新电话号码: ";
-    cin >> this->phoneNumber;
-    cout << "请输入新地址: ";
-    cin >> this->address;
+    cout << "请输入新密码: "; cin >> this->password;
+    cout << "请输入新名字: "; cin >> this->name;
+    cout << "请输入新电话号码: "; cin >> this->phoneNumber;
+    cout << "请输入新地址: "; cin >> this->address;
     char sql[MAX_SQL_LENGTH];
     sprintf(sql, "update user set password='%s',name='%s',phone_number='%s',address='%s' where id_card='%s'",
             this->password.c_str(),
@@ -214,16 +210,11 @@ bool User::updateUserInfo() {
     );
     int queryRes = mysql_query(Cur, sql);    //执行sql语句
     if (queryRes) {
-        // error
         string errorInfo = mysql_error(Cur);
         cout << errorInfo << endl;
-        cout << "failed!" << endl;
     } else { // query succeeded, process any data returned by it
         if (mysql_field_count(Cur) == 0) { // when (update || insert || delete)
             return true;
-            // query does not return data
-            // (it was not a SELECT)
-            // num_rows = mysql_affected_rows(Cur);
         } else { // mysql_store_result() should have returned data
             fprintf(stderr, "Error: %s\n", mysql_error(Cur));
         }
@@ -266,34 +257,22 @@ void User::showAllUserInfo() {
             int userId;
             int userType;
             Doctor *doctor;
-            cout.width(20);
-            cout << std::left << "id";
-            cout.width(23);
-            cout << std::left << "密码";
-            cout.width(22);
-            cout << std::left << "姓名";
-            cout.width(25);
-            cout << std::left << "性别";
-            cout.width(25);
-            cout << std::left << "手机号码";
-            cout.width(24);
-            cout << std::left << "身份证号";
-            cout.width(20);
-            cout << std::left << "地址";
-            cout.width(29);
-            cout << std::left << "用户类型";
-            cout.width(18);
-            cout << std::left << "职称";
-            cout.width(18);
-            cout << std::left << "简介" << endl;
+            cout.width(20); cout << std::left << "id";
+            cout.width(23); cout << std::left << "密码";
+            cout.width(22); cout << std::left << "姓名";
+            cout.width(25); cout << std::left << "性别";
+            cout.width(25); cout << std::left << "手机号码";
+            cout.width(24); cout << std::left << "身份证号";
+            cout.width(20); cout << std::left << "地址";
+            cout.width(29); cout << std::left << "用户类型";
+            cout.width(18); cout << std::left << "职称";
+            cout.width(18); cout << std::left << "简介" << endl;
             while ((row = mysql_fetch_row(result))) {
                 userId = atoi(row[0]);
                 userType = atoi(row[7]);
 
                 for (int i = 0; i < num_fields; i++) {
-                    cout.width(19);
-                    cout << std::left << row[i];
-                    cout << "\t";
+                    cout.width(19); cout << std::left << row[i] << "\t";
                 }
                 if (userType == DOCTOR) {
                     doctor = Doctor::getDoctorByUserId(userId);
